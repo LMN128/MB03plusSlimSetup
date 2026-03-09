@@ -357,12 +357,12 @@ STARTUP			ld	bc,#2003
 			call txy51.txy
 			ld	bc,#4010
 			ld	(txy51.cursor),bc
-			ld	hl,STARTUP4
-			call txy51.txy
-			ld	bc,#4810
-			ld	(txy51.cursor),bc
 			ld	hl,STARTUP5
 			call txy51.txy
+			/*ld	bc,#4810
+			ld	(txy51.cursor),bc
+			ld	hl,STARTUP5
+			call txy51.txy*/
 			ld	bc,#6803
 			ld	(txy51.cursor),bc
 			ld	hl,STARTUPinfo
@@ -395,7 +395,7 @@ startup_set		ld hl,STARTUP_VAL
 
 			ret
 		
-STARTUP_VAL		db 0,1,2,3,4,5,6,7,8,9,#A
+STARTUP_VAL		db 0,1,3,4
 
 AUDIO
 			ld	bc,#2003
@@ -744,10 +744,10 @@ DVO
 			ld	(txy51.cursor),bc
 			ld	hl,DVO3
 			call txy51.txy
-			ld	bc,#4010
+			/*ld	bc,#4010
 			ld	(txy51.cursor),bc
 			ld	hl,DVO4
-			call txy51.txy
+			call txy51.txy*/
 			ld hl, (fram_add+1)
 			
 			ld a,(max_cur+1)
@@ -1602,12 +1602,12 @@ EXTS0		ld	bc,#2003
 			call txy51.txy
 			ld	bc,#4010
 			ld	(txy51.cursor),bc
-			ld	hl,EXTS4
-			call txy51.txy
-			ld	bc,#4810
-			ld	(txy51.cursor),bc
 			ld	hl,EXTS5
 			call txy51.txy
+			/*ld	bc,#4810
+			ld	(txy51.cursor),bc
+			ld	hl,EXTS5
+			call txy51.txy*/
 			
 			ld hl, (fram_add+1)
 			ld a,(hl)
@@ -1636,7 +1636,7 @@ exts_set	ld hl,exts_VAL
 
 			ret
 
-exts_VAL	db 0,1,2,3,4,5		
+exts_VAL	db 0,1,3,4,5		
 
 ZONE0		ld	bc,#2003
 			ld	(txy51.cursor),bc
@@ -1892,10 +1892,10 @@ uart_set	ld hl,uart_VAL
 uart_VAL	db 0,1,2,3		
 
 
-reg_number  equ 25
+reg_number  equ 24
 REG_TAB
 			dw STARTUP
-			db 0,4
+			db 0,3
 			dw startup_set
 			dw #2022
 			
@@ -1904,10 +1904,10 @@ REG_TAB
 			dw dv_set
 			dw #2009
 
-			dw LED
+/*			dw LED
 			db 0,8
 			dw led_set
-			dw #2004 		
+			dw #2004 		*/
 
 			dw AUDIO
 			db 1,7
@@ -1935,7 +1935,7 @@ REG_TAB
 			dw #2011 
 			
 			dw EXTS0
-			db 0,4
+			db 0,3
 			dw exts_set
 			dw #2020 
 
@@ -1960,7 +1960,7 @@ REG_TAB
 			dw #200F
 			
 			dw DVO
-			db 1,3
+			db 1,2
 			dw dvo_set
 			dw #200A 	
 			
@@ -2041,7 +2041,7 @@ zxi_001		db #3F	//audio select
 zxi_002		db #03	//IDE - HOOD ports
 zxi_003		db #01	//RTC - enabled
 zxi_004		db #01	//LED Matrix - left/right
-zxi_005		db #00	//Wifi - disabled
+zxi_005		db #03	//Wifi - enable + with low power mode
 zxi_006		db #01	//SD - enabled
 zxi_007		db #01	//Kempston - enabled
 zxi_008		db #01	//LIFO stack - enabled
@@ -2081,7 +2081,7 @@ zxi_029		db #00
 zxi_02A		db #00
 zxi_02B		db #00
 zxi_02C		db #00	//Z-Controller
-zxi_02D		db #01	//divSD
+zxi_02D		db #00	//divSD
 zxi_02E		db #00	//SafeNMI
 zxi_02F		db #03	//INT
 zxi_030		db #00
@@ -2105,7 +2105,7 @@ zxi_040		db #01 //Time Zone
 
 ; --------------- T E X T---------------------------------------
 TEXT0 	 	dc 16,7,"LMN128"
-TEXT1    	db 16,69,"MB03+ Ultimate  ",16,7+64,"     SetUp"
+TEXT1    	db 16,69,"MB03+ Slim      ",16,7+64,"     SetUp"
 			dc " "
 TEXT2	 	db 16,65,"Cursor-navigation; Enter-change; R-restart"
 			dc " "
@@ -2276,11 +2276,11 @@ MICE1		db 16,67,"Mouse/Keyboard"
 			dc " "
 MICE2		db 16,7,"none (disabled)"
 			dc " "			
-MICE3		db 16,7,"K-Mouse master"
+MICE3		db 16,7,"Keyboard & K-Mouse master"
 			dc " "
-MICE4		db 16,7,"K-Mouse slave"
+MICE4		db 16,7,"Keyboard & K-Mouse slave"
 			dc " "			
-MICE5		db 16,7,"Keyboard"
+MICE5		db 16,7,"Keyboard only"
 			dc " "	
 
 ZCSD1		db 16,67,"Z-Controller SD"
@@ -2379,14 +2379,14 @@ ESP1		db 16,67,"UART (Wi-Fi)"
 			dc " "
 ESP2		db 16,7,"enable"
 			dc " "
-ESP3		db 16,7,"set lower RF power of Wi-Fi"
+ESP3		db 16,7,"set lower RF power"
 			dc " "	
 
 UART1		db 16,67,"UART (Wi-Fi) type"
 			dc " "
-UART2		db 16,7,"internal USB-UART - microUSB"
+UART2		db 16,7,"internal USB to UART - right port"
 			dc " "		
-UART3		db 16,7,"WiFi - ESP01 module"
+UART3		db 16,7,"Wi-Fi - ESP01 module"
 			dc " "	
 							
 ; --------------- L I B R A R I E S ---------------------------------------	
