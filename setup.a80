@@ -921,10 +921,7 @@ DVU
 			ld	(txy51.cursor),bc
 			ld	hl,DVU3
 			call txy51.txy
-			ld	bc,#4010
-			ld	(txy51.cursor),bc
-			ld	hl,DVU4
-			call txy51.txy
+
 			
 			ld hl, (fram_add+1)
 			
@@ -1849,6 +1846,56 @@ joy_set		ld hl,JOY_VAL
 			ret
 JOY_VAL		db 0,1,2,3,4,5,6,7
 
+PAD			ld	bc,#2003
+			ld	(txy51.cursor),bc
+			ld	hl,PAD1
+			call txy51.txy
+			ld	bc,#3010
+			ld	(txy51.cursor),bc
+			ld	hl,PAD2
+			call txy51.txy
+			ld	bc,#3810
+			ld	(txy51.cursor),bc
+			ld	hl,PAD3
+			call txy51.txy
+/*			ld	bc,#4010
+			ld	(txy51.cursor),bc
+			ld	hl,PAD4
+			call txy51.txy
+			ld	bc,#4810
+			ld	(txy51.cursor),bc
+			ld	hl,PAD5
+			call txy51.txy*/
+			
+			ld hl, (fram_add+1)
+			ld a,(hl)
+			ex af,af'
+			ld a,(max_cur+1)
+			ld b,a
+			ex af,af'
+			ld hl,PAD_VAL
+			call cur_num
+			ret
+
+pad_set		ld hl,PAD_VAL
+			ld d,0
+			ld e,a
+			add hl,de
+			ld a, (HL)
+			push af
+			ld hl, (fram_add+1)
+			ld (hl),a
+			ld bc, ZXi_port0
+			ld a,#1A
+			out (c),a
+			inc b
+			pop af
+			out (c),a
+
+			ret
+		
+PAD_VAL		db 0,1,2,3,4
+
 UART0		ld	bc,#2003
 			ld	(txy51.cursor),bc
 			ld	hl,UART1
@@ -1892,7 +1939,7 @@ uart_set	ld hl,uart_VAL
 uart_VAL	db 0,1,2,3		
 
 
-reg_number  equ 24
+reg_number  equ 25
 REG_TAB
 			dw STARTUP
 			db 0,3
@@ -1928,7 +1975,12 @@ REG_TAB
 			db 0,2
 			dw joy_set
 			dw #2007 
-
+			
+			dw PAD
+			db 0,2
+			dw joy_set
+			dw #201A 
+			
 			dw MICE
 			db 0,4
 			dw mice_set
@@ -1945,7 +1997,7 @@ REG_TAB
 			dw #200C  
 
 			dw DVU
-			db 1,3
+			db 1,2
 			dw dvu_set
 			dw #200D	
 			
@@ -1969,16 +2021,16 @@ REG_TAB
 			dw mmc_set
 			dw #2006 
 
-			dw ZCSD
-			db 0,3
-			dw zcsd_set
-			dw #202C 
-
 			dw DIVSD
 			db 1,2
 			dw divsd_set
 			dw #202D
-
+			
+			dw ZCSD
+			db 0,3
+			dw zcsd_set
+			dw #202C 
+			
 			dw ESP
 			db 1,2
 			dw esp_set
@@ -2004,15 +2056,15 @@ REG_TAB
 			dw nmi_set
 			dw #202F
 
+			dw ZONE0
+			db 0,14
+			dw zone_set
+			dw #2040
+
 			dw CROM
 			db 0,#B
 			dw crom_set
 			dw #2010 //FRAM address
-
-			dw ZONE0
-			db 0,14
-			dw zone_set
-			dw #2040 
 
 			dw DEBUG0
 			db 0,6
@@ -2062,7 +2114,7 @@ zxi_016		db #00	//reserved
 zxi_017		db #00	//reserved
 zxi_018		db #00	//TurboSound FM
 zxi_019		db #00	//SID
-zxi_01A		db #00	//reserved
+zxi_01A		db #00	//JoyPad
 zxi_01B		db #00	//reserved
 zxi_01C		db #00	//reserved
 zxi_01D		db #00	//reserved
@@ -2142,9 +2194,9 @@ AUDIO2		db 16,7,"enable ULA audio"
 			dc " "
 AUDIO3		db 16,7,"enable TurboSound (3xAY or TSFM)"
 			dc " "
-AUDIO4		db 16,7,"enable Sam Coupe SAA1099 chip"
+AUDIO4		db 16,7,"enable SAA1099"
 			dc " "
-AUDIO5		db 16,7,"enable MonsterBlaster (SounDrive, etc.)"
+AUDIO5		db 16,7,"enable MonsterBlaster DA(SounDrive, etc.)"
 			dc " "
 AUDIO6		db 16,7,"enable General Sound"
 			dc " "
@@ -2166,7 +2218,7 @@ TSFM2		db 16,7,"Chip model: 0-AY, 1-YM"
 			dc " "							
 TSFM3		db 16,7,"Stereo: 0-ACB, 1-ABC"
 			dc " "	
-TSFM4		db 16,7,"select 0-3xAY or 1-TSFM(2xYM2203)"
+TSFM4		db 16,7,"select 0-3xAY or 1-TSFM (2xYM2203)"
 			dc " "							
 
 LED1		db 16,67,"LED Matrix "
@@ -2188,7 +2240,7 @@ LED8		db 16,7,"Memory CPU /M1 only map"
 LED9		db 16,7,"Memory Ultimate mode map"
 			dc " "											
 
-MMC1		db 16,67,"SD/MMC "
+MMC1		db 16,67,"SD storage "
 			dc " "
 MMC2		db 16,7,"enable"
 			dc " "
@@ -2200,6 +2252,13 @@ JOY2		db 16,7,"none (disabled)"
 JOY3		db 16,7,"Kempston "
 			dc " "
 
+PAD1		db 16,67,"Joystick/DE9 connector"
+			dc " "
+PAD2		db 16,7,"standard joystick (8bits era)"
+			dc " "
+PAD3		db 16,7,"Sega controller (3-8 buttons)"
+			dc " "			
+
 DV1			db 16,67,"Video timing (ZX machine)"
 			dc " "
 DV2			db 16,7,"ZX Spectrum 48"
@@ -2210,9 +2269,9 @@ DV4			db 16,7,"Harlequin 128 (model 2D)"
 			dc " "
 DV5			db 16,7,"ZX Spectrum 128+2A/2B/+3"
 			dc " "
-DV51		db 16,7,"48K clones on 3.5000MHz: Humble48, etc."
+DV51		db 16,7,"48K clones on 3.50 MHz: Humble48, etc."
 			dc " "	
-DV52		db 16,7,"Pentagon on 3.5000MHz"
+DV52		db 16,7,"Pentagon on 3.50 MHz"
 			dc " "			
 DV53		db 16,7,"Karabas 128"
 			dc " "							
@@ -2250,8 +2309,8 @@ DVU2		db 16,7,"enable ULAplus palettes"
 			dc " "
 DVU3		db 16,7,"enable TIMEX mode select by ULAplus regs"	
 			dc " "
-DVU4		db 16,7,"enable SLAM+ slow ports (not implemented)"	
-			dc " "	
+//DVU4		db 16,7,"enable SLAM+ slow ports (not implemented)"	
+//			dc " "	
 
 DVP1		db 16,67,"Scanline (old CRT/TV) effect"
 			dc " "
@@ -2301,7 +2360,7 @@ DIVSD3		db 16,7,"swap order first/second SD"
 
 DMA1		db 16,67,"DMA"
 			dc " "
-DMA2		db 16,7,"enable MB03+ DMA"
+DMA2		db 16,7,"enable Z80-DMA"
 			dc " "		
 DMA3		db 16,7,"enable detection other DMA e.g. in eLeMeNt ZX"
 			dc " "	
@@ -2375,7 +2434,7 @@ DEBUG4		db 16,7,"Video Test Text Pattern"
 DEBUG5		db 16,7,"Video Test Colour Moving Pattern"
 			dc " "	
 
-ESP1		db 16,67,"UART (Wi-Fi)"
+ESP1		db 16,67,"UART (Wi-Fi) parameters"
 			dc " "
 ESP2		db 16,7,"enable"
 			dc " "
@@ -2384,9 +2443,9 @@ ESP3		db 16,7,"set lower RF power"
 
 UART1		db 16,67,"UART (Wi-Fi) type"
 			dc " "
-UART2		db 16,7,"internal USB to UART - right port"
+UART2		db 16,7,"UART on the USB3"
 			dc " "		
-UART3		db 16,7,"Wi-Fi - ESP01 module"
+UART3		db 16,7,"Wi-Fi via ESP01 module"
 			dc " "	
 							
 ; --------------- L I B R A R I E S ---------------------------------------	
@@ -2472,8 +2531,8 @@ baslen	=	$-baszac
 	
 		
 	savesna  "setup.sna",ramcode
-	EMPTYTAP "setup.tap"
-	SAVETAP  "setup.tap" , BASIC, setup , baszac,baslen,1
-	SAVETAP  "setup.tap",CODE,"setup",maincode,endramcode-maincode,maincode
+	EMPTYTAP "SetupSlim.tap"
+	SAVETAP  "SetupSlim.tap" , BASIC, setup , baszac,baslen,1
+	SAVETAP  "SetupSlim.tap",CODE,"setup",maincode,endramcode-maincode,maincode
 	ENDMODULE
 		
